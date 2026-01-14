@@ -5,7 +5,7 @@ from PySide6.QtWidgets import (
     QToolButton, QGridLayout, QFileIconProvider
 )
 from PySide6.QtGui import QCursor, QIcon
-from PySide6.QtCore import Qt, QSize, QFileInfo, QPropertyAnimation, QEasingCurve, QPoint, QEvent
+from PySide6.QtCore import Qt, QSize, QFileInfo, QPropertyAnimation, QEasingCurve, QPoint, QEvent, QAbstractAnimation
 
 APPS = [
     ("Valorant", r"C:\Riot Games\Riot Client\RiotClientServices.exe"),
@@ -22,7 +22,7 @@ class MainWindow(QWidget) :
         self.setWindowFlags(
             Qt.FramelessWindowHint |
             Qt.Tool |
-           
+            Qt.WindowStaysOnTopHint |
             Qt.Popup
         )
         self.setAttribute(Qt.WA_TranslucentBackground)
@@ -103,6 +103,8 @@ class MainWindow(QWidget) :
         self.pos_anim.setEndValue(self._start_pos)
         self.pos_anim.setEasingCurve(QEasingCurve.OutCubic)
 
+        self._closing = False
+
     def showEvent(self, event):
         super().showEvent(event)
 
@@ -114,22 +116,33 @@ class MainWindow(QWidget) :
         self.opacity_anim.start()
         self.pos_anim.start()
 
+    def close_with_animation(self):
+        if self._closing:
+            return
+        self._closing = True
+
+        self.opacity_anim.setDirection(QAbstractAnimation.Backward)
+        self.pos_anim.setDirection(QAbstractAnimation.Backward)
+
+        self.opacity_anim.finished.connect(QApplication.quit)
+
+        self.opacity_anim.start()
+        self.pos_anim.start()
+
     def focusOutEvent(self, event):
-        self.close()
+        self.close_with_animation()
         super().focusOutEvent(event)
     
     def keyPressEvent(self, event):
-        key = event.key()
-        print(event.text())
         if event.key() == Qt.Key_Escape:
-            self.close()
+            self.close_with_animation()
 
     def closeEvent(self, event):
         QApplication.quit()
     
     def shortCutClicked(self, path):
         subprocess.Popen(path)
-        self.close()
+        self.close_with_animation()
 
     def eventFilter(self, obj, event):
         if event.type() == QEvent.MouseButtonPress and self.isVisible():
@@ -137,7 +150,7 @@ class MainWindow(QWidget) :
             pos = event.globalPos()
             # if click is outside this window, close it
             if not self.geometry().contains(pos):
-                self.close()
+                self.close_with_animation()
         return super().eventFilter(obj, event)
 
 
