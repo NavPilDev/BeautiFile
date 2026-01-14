@@ -27,8 +27,6 @@ class MainWindow(QWidget) :
         )
         self.setAttribute(Qt.WA_TranslucentBackground)
         
-        icon_provider = QFileIconProvider()
-
         container = QFrame(self)
         container.setStyleSheet("""
         QFrame {
@@ -40,6 +38,14 @@ class MainWindow(QWidget) :
         layout = QGridLayout(container)
         layout.setContentsMargins(10, 10, 10, 10)
         
+        self.createShortcuts(layout)
+        self.resize(container.sizeHint())
+        container.resize(self.size())
+        self.handlePosition()
+        self.createAnims()
+        
+    def createShortcuts(self, layout):
+        icon_provider = QFileIconProvider()
         for i, (name, path) in enumerate(APPS):
             btn = QToolButton()
             btn.setText(name)
@@ -53,10 +59,8 @@ class MainWindow(QWidget) :
             
             btn.clicked.connect(lambda _, p=path: self.shortCutClicked(p))
             layout.addWidget(btn, 0, i)
-        
-        self.resize(container.sizeHint())
-        container.resize(self.size())
-
+    
+    def handlePosition(self):
         screen = QApplication.primaryScreen()
         geom = screen.availableGeometry()
 
@@ -87,7 +91,7 @@ class MainWindow(QWidget) :
 
         self.move(x, y)
 
-        ########## Animations ############
+    def createAnims(self):
         self.setWindowOpacity(0.0)
         self._start_pos = self.pos()
         
