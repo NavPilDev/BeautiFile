@@ -35,7 +35,7 @@ class MainWindow(QWidget) :
         """)
 
         layout = QGridLayout(container)
-        layout.setContentsMargins(20, 20, 20, 20)
+        layout.setContentsMargins(10, 10, 10, 10)
         
         for i, (name, path) in enumerate(APPS):
             btn = QToolButton()
@@ -46,7 +46,7 @@ class MainWindow(QWidget) :
             btn.setIcon(QIcon(icon))
 
             btn.setToolButtonStyle(Qt.ToolButtonTextUnderIcon)
-            btn.setIconSize(QSize(64, 64))
+            btn.setIconSize(QSize(48, 48))
             
             btn.clicked.connect(lambda _, p=path: self.shortCutClicked(p))
             layout.addWidget(btn, 0, i)
@@ -54,13 +54,35 @@ class MainWindow(QWidget) :
         self.resize(container.sizeHint())
         container.resize(self.size())
 
-        cursor_pos = QCursor.pos()
-        screen_geom = QApplication.primaryScreen().availableGeometry()
+        screen = QApplication.primaryScreen()
+        geom = screen.availableGeometry()
 
-        x = cursor_pos.x() + 60
-        y = cursor_pos.y() - self.height() // 2 
+        # Approximate desktop icon grid cell size (tweak these to match your setup)
+        cell_w = 100   # width of one desktop icon slot
+        cell_h = 102   # height of one desktop icon slot
 
-        self.move(x,y)
+        cursor = QCursor.pos()
+
+        # Convert cursor pos to grid coordinates (relative to desktop top-left)
+        col = (cursor.x() - geom.left()) // cell_w
+        row = (cursor.y() - geom.top())  // cell_h
+
+        # Target cell: one cell to the right
+        target_col = col + 2
+
+        # Top-left of that target cell
+        target_x = geom.left() + target_col * cell_w
+        target_y = geom.top()  + row       * cell_h
+
+        # Center our window inside that cell
+        x = int(target_x + (cell_w - self.width()) / 2)
+        y = int(target_y + (cell_h - self.height()) / 2)
+
+        # Clamp to screen
+        x = max(geom.left(), min(x, geom.right() - self.width()))
+        y = max(geom.top(),  min(y, geom.bottom() - self.height()))
+
+        self.move(x, y)
 
     def focusOutEvent(self, event):
         self.close()
