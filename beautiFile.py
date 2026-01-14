@@ -4,7 +4,7 @@ from PySide6.QtWidgets import (
     QApplication, QMainWindow, QWidget, QFrame,
     QToolButton, QGridLayout, QFileIconProvider
 )
-from PySide6.QtGui import QIcon
+from PySide6.QtGui import QCursor, QIcon
 from PySide6.QtCore import Qt, QSize, QFileInfo
 
 APPS = [
@@ -53,6 +53,14 @@ class MainWindow(QWidget) :
         
         self.resize(container.sizeHint())
         container.resize(self.size())
+
+        cursor_pos = QCursor.pos()
+        screen_geom = QApplication.primaryScreen().availableGeometry()
+
+        x = cursor_pos.x() + 60
+        y = cursor_pos.y() - self.height() // 2 
+
+        self.move(x,y)
 
     def focusOutEvent(self, event):
         self.close()
