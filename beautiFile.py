@@ -6,7 +6,6 @@ from PySide6.QtWidgets import (
 )
 from PySide6.QtGui import QIcon
 from PySide6.QtCore import Qt, QSize, QFileInfo
-import win32com.client
 
 APPS = [
     ("Valorant", r"C:\Riot Games\Riot Client\RiotClientServices.exe"),
@@ -18,6 +17,12 @@ APPS = [
 class MainWindow(QWidget) :
     def __init__(self):
         super().__init__()
+        self.setWindowFlags(
+            Qt.FramelessWindowHint |
+            Qt.Tool |
+            Qt.WindowStaysOnTopHint
+        )
+        self.setAttribute(Qt.WA_TranslucentBackground)
         
         icon_provider = QFileIconProvider()
 
@@ -25,12 +30,13 @@ class MainWindow(QWidget) :
         container.setStyleSheet("""
         QFrame {
             background-color: rgba(36, 36, 36, 210);
+            border-radius: 20px;
         }
         """)
         layout = QGridLayout(container)
         layout.setContentsMargins(20, 20, 20, 20)
         
-        for name, path in APPS:
+        for i, (name, path) in enumerate(APPS):
             btn = QToolButton()
             btn.setText(name)
 
@@ -42,7 +48,7 @@ class MainWindow(QWidget) :
             btn.setIconSize(QSize(64, 64))
             
             btn.clicked.connect(lambda _, p = path: subprocess.Popen(p))
-            layout.addWidget(btn)
+            layout.addWidget(btn, 0, i)
         
         self.resize(container.sizeHint())
         container.resize(self.size())
