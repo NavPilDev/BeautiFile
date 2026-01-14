@@ -33,6 +33,7 @@ class MainWindow(QWidget) :
             border-radius: 20px;
         }
         """)
+
         layout = QGridLayout(container)
         layout.setContentsMargins(20, 20, 20, 20)
         
@@ -47,12 +48,28 @@ class MainWindow(QWidget) :
             btn.setToolButtonStyle(Qt.ToolButtonTextUnderIcon)
             btn.setIconSize(QSize(64, 64))
             
-            btn.clicked.connect(lambda _, p = path: subprocess.Popen(p))
+            btn.clicked.connect(lambda _, p=path: self.shortCutClicked(p))
             layout.addWidget(btn, 0, i)
         
         self.resize(container.sizeHint())
         container.resize(self.size())
 
+    def focusOutEvent(self, event):
+        self.close()
+        super().focusOutEvent(event)
+    
+    def keyPressEvent(self, event):
+        key = event.key()
+        print(event.text())
+        if event.key() == Qt.Key_Escape:
+            self.close()
+
+    def closeEvent(self, event):
+        QApplication.quit()
+    
+    def shortCutClicked(self, path):
+        subprocess.Popen(path)
+        self.close()
 
 
 app = QApplication(sys.argv)
