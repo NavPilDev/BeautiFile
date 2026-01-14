@@ -1,4 +1,5 @@
 import sys
+import json
 import subprocess
 from PySide6.QtWidgets import (
     QApplication, QMainWindow, QWidget, QFrame,
@@ -7,12 +8,6 @@ from PySide6.QtWidgets import (
 from PySide6.QtGui import QCursor, QIcon
 from PySide6.QtCore import Qt, QSize, QFileInfo, QPropertyAnimation, QEasingCurve, QPoint, QEvent, QAbstractAnimation
 
-APPS = [
-    ("Valorant", r"C:\Riot Games\Riot Client\RiotClientServices.exe"),
-    ("Steam", r"C:\Program Files (x86)\Steam\Steam.exe"),
-    ("Epic Games", r"C:\Program Files (x86)\Epic Games\Launcher\Portal\Binaries\Win64\EpicGamesLauncher.exe"),
-    ("Marvel Rivals", r"C:\Games\MarvelRivals.exe"),
-]
 
 class MainWindow(QWidget) :
     def __init__(self):
@@ -157,6 +152,17 @@ class MainWindow(QWidget) :
                 self.close_with_animation()
         return super().eventFilter(obj, event)
 
+def load_apps(group_name: str):
+    with open("beautFile_config.json", "r") as f:
+        data = json.load(f)
+    return data[group_name]
+
+if __name__ == "__main__":
+    APPS = load_apps("Games")
+    app = QApplication(sys.argv)
+    window = MainWindow()
+    window.show()
+    app.exec()
 
 app = QApplication(sys.argv)
 
