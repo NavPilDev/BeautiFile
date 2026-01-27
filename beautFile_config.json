@@ -1,12 +1,56 @@
 {
     "Games": [
         [
-            "Hades",
-            "C:/Users/Proba/OneDrive/Desktop/Games/Hades.url"
+            "Update",
+            "C:/Users/Proba/AppData/Local/Discord/Update.exe"
         ],
         [
-            "Marvel Rivals",
-            "C:/Users/Proba/OneDrive/Desktop/Games/Marvel Rivals.url"
+            "OpenCode",
+            "C:/Users/Proba/AppData/Local/OpenCode/OpenCode.exe"
+        ],
+        [
+            "Spotify",
+            "C:/Users/Proba/AppData/Roaming/Spotify/Spotify.exe"
+        ],
+        [
+            "warp",
+            "C:/Users/Proba/AppData/Local/Programs/Warp/warp.exe"
+        ],
+        [
+            "Zoom",
+            "C:/Users/Proba/AppData/Roaming/Zoom/bin/Zoom.exe"
+        ],
+        [
+            "2025-12-01 23-55-21",
+            "C:/Users/Proba/Videos/2025-12-01 23-55-21.mp4"
+        ],
+        [
+            "2026-01-13 11-57-26",
+            "C:/Users/Proba/Videos/2026-01-13 11-57-26.mp4"
+        ],
+        [
+            "2026-01-13 11-58-36",
+            "C:/Users/Proba/Videos/2026-01-13 11-58-36.mp4"
+        ],
+        [
+            "2026-01-13 11-57-26",
+            "C:/Users/Proba/Videos/2026-01-13 11-57-26.mp4"
+        ],
+        [
+            "2026-01-13 11-58-36",
+            "C:/Users/Proba/Videos/2026-01-13 11-58-36.mp4"
+        ],
+        [
+            "2026-01-13 12-02-55",
+            "C:/Users/Proba/Videos/2026-01-13 12-02-55.mp4"
+        ],
+        [
+            "2026-01-13 13-44-40",
+            "C:/Users/Proba/Videos/2026-01-13 13-44-40.mp4"
+        ],
+        [
+            "2026-01-13 15-56-17",
+            "C:/Users/Proba/Videos/2026-01-13 15-56-17.mp4"
         ]
     ]
 }
