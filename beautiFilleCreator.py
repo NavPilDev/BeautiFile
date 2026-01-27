@@ -6,7 +6,7 @@ import subprocess
 from PySide6.QtWidgets import (
     QApplication, QMainWindow, QFrame, QMessageBox, QPushButton,
     QWidget, QVBoxLayout, QFileDialog, QInputDialog, QLabel,
-    QHBoxLayout, QToolButton, QFileIconProvider, QGridLayout
+    QHBoxLayout, QToolButton, QFileIconProvider, QGridLayout, QLineEdit
 )
 from PySide6.QtGui import QCursor, QIcon
 from PySide6.QtCore import Qt, QSize, QFileInfo, QPropertyAnimation, QEasingCurve, QPoint, QEvent, QAbstractAnimation
@@ -187,13 +187,102 @@ class MainWindow(QMainWindow):
         super().__init__()
         container = QWidget()
         self.setCentralWidget(container)
-        self.setWindowTitle("BeautiFile Config")
+        self.setWindowTitle("BeautiFile")
+
+        self.group_windows = []
 
         layout = QVBoxLayout(container)
-        button = QPushButton("Create New App Group")
-        button.clicked.connect(self.new_group_config)
+        layout.setContentsMargins(16, 12, 16, 12)
+        layout.setSpacing(12)
 
-        layout.addWidget(button)
+        # Top bar: search + controls
+        top_bar = QHBoxLayout()
+
+        # Search field styled like Figma
+        search_frame = QFrame()
+        search_frame.setObjectName("searchFrame")
+        search_layout = QHBoxLayout(search_frame)
+        search_layout.setContentsMargins(8, 4, 8, 4)
+        search_layout.setSpacing(6)
+
+        search_icon = QLabel("🔍")
+        self.search_edit = QLineEdit()
+        self.search_edit.setPlaceholderText("Search for an App Group...")
+        self.search_edit.textChanged.connect(self.refresh_groups)
+
+        search_layout.addWidget(search_icon)
+        search_layout.addWidget(self.search_edit)
+
+        top_bar.addWidget(search_frame, 1)
+
+        # Spacer then plus/settings/close controls
+        add_button = QToolButton()
+        add_button.setText("+")
+        add_button.setAutoRaise(True)
+        add_button.clicked.connect(self.new_group_config)
+
+        settings_button = QToolButton()
+        settings_button.setText("⚙")
+        settings_button.setAutoRaise(True)
+
+        close_button = QToolButton()
+        close_button.setText("✕")
+        close_button.setAutoRaise(True)
+        close_button.clicked.connect(self.close)
+
+        top_bar.addSpacing(8)
+        top_bar.addWidget(add_button)
+        top_bar.addWidget(settings_button)
+        top_bar.addWidget(close_button)
+
+        layout.addLayout(top_bar)
+
+        # Center content: empty state or group tiles
+        center = QVBoxLayout()
+        center.setAlignment(Qt.AlignCenter)
+
+        self.empty_label = QLabel("No beautiFiles created!")
+        self.empty_label.setAlignment(Qt.AlignCenter)
+
+        self.create_group_button = QPushButton("Create New App Group")
+        self.create_group_button.clicked.connect(self.new_group_config)
+
+        center.addWidget(self.empty_label)
+        center.addWidget(self.create_group_button)
+
+        layout.addLayout(center)
+
+        # Grid of group cards (shown when there are groups)
+        self.groups_layout = QGridLayout()
+        self.groups_layout.setHorizontalSpacing(24)
+        self.groups_layout.setVerticalSpacing(16)
+        layout.addLayout(self.groups_layout)
+
+        # Styling for search and main container
+        container.setStyleSheet(
+            """
+            QFrame#searchFrame {
+                background-color: #5a5a5a;
+                border-radius: 10px;
+            }
+            QLineEdit {
+                border: none;
+                background: transparent;
+                color: white;
+            }
+            QPushButton {
+                background-color: #5a5a5a;
+                color: white;
+                border-radius: 8px;
+                padding: 6px 14px;
+            }
+            QPushButton:hover {
+                background-color: #707070;
+            }
+            """
+        )
+
+        self.refresh_groups()
 
     def load_config(self):
         if not os.path.exists(CONFIG_FILE):
@@ -208,6 +297,113 @@ class MainWindow(QMainWindow):
     def save_config(self, data):
         with open(CONFIG_FILE, "w") as f:
             json.dump(data, f, indent=4)
+        # whenever config changes, refresh list
+        self.refresh_groups()
+
+    def clear_group_tiles(self):
+        while self.groups_layout.count():
+            item = self.groups_layout.takeAt(0)
+            w = item.widget()
+            if w is not None:
+                w.deleteLater()
+
+    def refresh_groups(self):
+        """Refresh the main screen list of app groups from config."""
+        data = self.load_config()
+        query = self.search_edit.text().strip().lower() if hasattr(self, "search_edit") else ""
+
+        # Filter by search
+        groups = [
+            (name, apps)
+            for name, apps in data.items()
+            if not query or query in name.lower()
+        ]
+
+        self.clear_group_tiles()
+
+        if not groups:
+            # Show empty state
+            self.empty_label.show()
+            self.create_group_button.show()
+            return
+
+        self.empty_label.hide()
+        self.create_group_button.hide()
+
+        icon_provider = QFileIconProvider()
+
+        for index, (group_name, apps) in enumerate(groups):
+            row = index // 3
+            col = index % 3
+
+            # Outer clickable card (no heavy background)
+            card = QFrame()
+            card.setObjectName("groupCard")
+            card_layout = QHBoxLayout(card)
+            card_layout.setContentsMargins(4, 4, 4, 4)
+            card_layout.setSpacing(8)
+
+            # Thumbnail rounded square
+            thumb = QFrame()
+            thumb.setObjectName("groupThumb")
+            thumb.setFixedSize(70, 70)
+            thumb_layout = QHBoxLayout(thumb)
+            thumb_layout.setContentsMargins(8, 8, 8, 8)
+            thumb_layout.setSpacing(4)
+
+            # Small icon strip inside thumbnail (up to 3 icons, then ...)
+            for i, (_, path) in enumerate(apps[:3]):
+                icon_label = QLabel()
+                file_info = QFileInfo(path)
+                icon = icon_provider.icon(file_info)
+                pix = icon.pixmap(QSize(24, 24))
+                icon_label.setPixmap(pix)
+                thumb_layout.addWidget(icon_label)
+
+            if len(apps) > 3:
+                more_label = QLabel("…")
+                thumb_layout.addWidget(more_label)
+
+            card_layout.addWidget(thumb)
+
+            # Text column
+            text_col = QVBoxLayout()
+            text_col.setContentsMargins(0, 0, 0, 0)
+            text_col.setSpacing(2)
+
+            name_label = QLabel(group_name)
+            name_label.setObjectName("groupName")
+            count = len(apps)
+            files_label = QLabel(f"{count} file" + ("" if count == 1 else "s"))
+
+            text_col.addWidget(name_label)
+            text_col.addWidget(files_label)
+
+            card_layout.addLayout(text_col)
+
+            # Styling for thumbnail and name
+            card.setStyleSheet(
+                """
+                QFrame#groupThumb {
+                    background-color: #555359;
+                    border-radius: 18px;
+                }
+                QLabel#groupName {
+                    color: white;
+                    font-weight: 600;
+                }
+                """
+            )
+
+            # Clicking a card opens the AppGroupWindow
+            def make_open(name):
+                def handler(event):
+                    self.open_group(name)
+                return handler
+
+            card.mousePressEvent = make_open(group_name)
+
+            self.groups_layout.addWidget(card, row, col)
 
     def new_group_config(self):
         # 1) Ask for group name
@@ -226,7 +422,11 @@ class MainWindow(QMainWindow):
         self.save_config(data)
 
         # 2) Open the Figma-style app group interface
+        self.open_group(group_name)
+
+    def open_group(self, group_name: str):
         editor = AppGroupWindow(self, group_name)
+        self.group_windows.append(editor)
         editor.show()
 
     def launch_group(self, group_name: str):
