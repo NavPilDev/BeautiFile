@@ -1,8 +1,12 @@
 {
     "Games": [
-      ["Valorant", "C:/Riot Games/Riot Client/RiotClientServices.exe"],
-      ["Marvel Rivals", "C:/Games/MarvelRivals.exe"],
-      ["Steam", "C:/Program Files (x86)/Steam/Steam.exe"],
-      ["Epic Games", "C:/Program Files (x86)/Epic Games/Launcher/Portal/Binaries/Win64/EpicGamesLauncher.exe"]
+        [
+            "Hades",
+            "C:/Users/Proba/OneDrive/Desktop/Games/Hades.url"
+        ],
+        [
+            "Marvel Rivals",
+            "C:/Users/Proba/OneDrive/Desktop/Games/Marvel Rivals.url"
+        ]
     ]
-  }
+}

@@ -152,20 +152,18 @@ class MainWindow(QWidget) :
                 self.close_with_animation()
         return super().eventFilter(obj, event)
 
+
 def load_apps(group_name: str):
     with open("beautFile_config.json", "r") as f:
         data = json.load(f)
-    return data[group_name]
+    return data.get(group_name, [])
+
 
 if __name__ == "__main__":
-    APPS = load_apps("Games")
+    group = sys.argv[1] if len(sys.argv) > 1 else "Games"
+    APPS = load_apps(group)
+
     app = QApplication(sys.argv)
     window = MainWindow()
     window.show()
     app.exec()
-
-app = QApplication(sys.argv)
-
-window = MainWindow()
-window.show()
-app.exec()
